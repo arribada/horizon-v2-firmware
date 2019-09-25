@@ -99,6 +99,10 @@ typedef enum
     CMD_LOG_READ_REQ,   // Read the log file from the starting offset for the given number of bytes
     CMD_LOG_READ_RESP,  // Response for a read request
 
+    //////////////////// System /////////////////////
+    CMD_ID_REQ,                     // Request ID
+    CMD_ID_RESP,                    // ID response
+
 } cmd_id_t;
 
 // Error codes
@@ -260,6 +264,13 @@ typedef struct __attribute__((__packed__))
     uint32_t length;
 } cmd_log_read_resp_t;
 
+//////////////////// ID /////////////////////
+typedef struct __attribute__((__packed__))
+{
+    uint8_t error_code;
+    device_id_t mcu_uid;
+} cmd_id_resp_t;
+
 typedef struct __attribute__((__packed__))
 {
     cmd_hdr_t h;
@@ -287,6 +298,7 @@ typedef struct __attribute__((__packed__))
         cmd_log_create_req_t                cmd_log_create_req;
         cmd_log_read_req_t                  cmd_log_read_req;
         cmd_log_read_resp_t                 cmd_log_read_resp;
+        cmd_id_resp_t                       cmd_id_resp;
     } p;
 } cmd_t;
 

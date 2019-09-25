@@ -2519,6 +2519,32 @@ static void status_req(cmd_t * req, uint32_t size)
     config_if_send_priv(&config_if_send_buffer);
 }
 
+////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////// ID_REQ ////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////
+
+static void id_req(cmd_t * req, uint32_t size)
+{
+    UNUSED(req);
+
+    // Check request size is correct
+    if (size != CMD_SIZE_HDR)
+        Throw(EXCEPTION_REQ_WRONG_SIZE);
+
+    // Generate and send response
+    cmd_t * resp;
+    if (!buffer_write(&config_if_send_buffer, (uintptr_t *)&resp))
+        Throw(EXCEPTION_TX_BUFFER_FULL);
+    CMD_SET_HDR(resp, CMD_ID_RESP);
+
+    resp->p.cmd_status_resp.error_code = CMD_NO_ERROR;
+    // Get unique ID
+    syshal_device_id(&(resp->p.cmd_id_resp.mcu_uid));
+
+    buffer_write_advance(&config_if_send_buffer, CMD_SIZE(cmd_id_resp_t));
+    config_if_send_priv(&config_if_send_buffer);
+}
+
 static void fw_send_image_req(cmd_t * req, uint32_t size)
 {
     // Check request size is correct
@@ -3379,6 +3405,11 @@ static void message_idle_state(void)
             case CMD_LOG_READ_REQ:
                 DEBUG_PR_INFO("LOG_READ_REQ");
                 log_read_req(req, length);
+                break;
+
+            case CMD_ID_REQ:
+                DEBUG_PR_INFO("ID_REQ");
+                id_req(req, length);
                 break;
 
             default:
